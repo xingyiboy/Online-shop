@@ -15,17 +15,6 @@ public class Shop {
     static File goodsFile = new File("C:/goods.txt");
     static File myGoodsFile = new File("C:/mygoods.txt");
 
-    // 用户将商品添加到购物车
-    public void addGoodsToCart(User user, Goods goods) {
-        user.addToCart(goods);
-    }
-
-
-
-    // 用户查看购物车
-    public void showShoppingCart(User user) {
-        user.showShoppingCart();
-    }
     //保存用户表
     public static void saveUserListToFile() {
         try {
@@ -190,11 +179,12 @@ public class Shop {
         System.out.println("*****欢迎进入电子商城*****");
         System.out.println("\t1.注册");
         System.out.println("\t2.登录");
-        System.out.println("\t3.查看商城并添加购物车");
+        System.out.println("\t3.查看商城");
         System.out.println("\t4.查看我购买的商品");
         System.out.println("\t5.管理员登录");
         System.out.println("\t6.购物车系统");
-        System.out.println("\t7.保存并退出系统");
+        System.out.println("\t7.收藏夹系统");
+        System.out.println("\t8.保存并退出系统");
         System.out.println("***********************");
         System.out.print("请选择菜单：");
         int choice = sc.nextInt(); //选择的菜单
@@ -221,41 +211,55 @@ public class Shop {
                     loginUser = user.login();
                 break;
             case 3:
-                System.out.println("您选择的菜单是：查看商城");
-                showGoodList();
+
                 //判断用户是否登录，已确定是购买还是提示登录
                 if(User.isLogin) {//在User类中定义静态成员变量isLogin，在登录方法中，登录成功后设置为true
                     String is_continue = "Y";
                     while("Y".equals(is_continue) || "y".equals(is_continue)) {
+                        System.out.println("您选择的菜单是：查看商城");
                         //购买商品
+                        //展示收藏夹和商品列表
+                        loginUser.showFavorites();
+                        showGoodList();
                         buy();
-                        System.out.println("是否继续购买：Y/N");
+                        System.out.println("是否继续浏览商城：Y/N");
                         is_continue = sc.next();
                     }
 //                    System.out.println("*******商品购买成功！********");
-                    System.out.println("*******添加购物车成功！********");
-                    //查看购物车
-                    showShoppingCart(loginUser);
+//                    System.out.println("*******添加购物车成功！********");
+                    //查看购物车和收藏夹
+                    loginUser.showFavorites();
+                    loginUser.showShoppingCart();
                     //查看购买的商品列表
-//                    showMyGoodList();
+                    showMyGoodList();
                 }else{
-                    System.out.println("您还未登录，请先登录，再购买商品");
+                    System.out.println("您还未登录，请先登录");
                 }
                 break;
             case 4:
-                System.out.println("您选择的菜单是：查看我购买的商品");
-                showMyGoodList();
+                //判断用户是否登录，已确定是购买还是提示登录
+                if(User.isLogin) {//在User类中定义静态成员变量isLogin，在登录方法中，登录成功后设置为true
+                    System.out.println("您选择的菜单是：查看我购买的商品");
+                    showMyGoodList();
+                }else{
+                    System.out.println("您还未登录，请先登录");
+                }
                 break;
+
             case 5:
                 System.out.println("您选择的菜单是:管理员登录");
                 Admin admin=new Admin();
                 admin.adminLogin();
                 break;
             case 6:
-                System.out.println("您选择的菜单是:查看购物车");
+                System.out.println("您选择的菜单是:购物车系统");
                 ShoppingCart();
                 break;
             case 7:
+                System.out.println("您选择的菜单是:收藏夹系统");
+                Favorites();
+                break;
+            case 8:
                 System.out.println("谢谢使用!");
                 saveUserListToFile();
                 saveMyGoodsListToFile();
@@ -269,53 +273,99 @@ public class Shop {
         }
         return go_on;
     }
+    // 收藏夹
+    private void Favorites() {
+        if (User.isLogin) {
+            while (true) {
+                System.out.println("**********收藏夹功能***********");
+                System.out.println("\t1.查看收藏夹");
+                System.out.println("\t2.从收藏夹移除商品");
+                System.out.println("\t3.清空收藏夹");
+                System.out.println("\t4.返回上一级菜单");
+                System.out.print("请选择菜单：");
+                int cartChoice = sc.nextInt();
+                switch (cartChoice){
+                    case 1:
+                        System.out.println("*****查看收藏夹*****");
+                        loginUser.showFavorites();
+                        break;
+                    case 2:
+                        loginUser.showFavorites();
+                        System.out.print("请输入要移除的收藏夹排序号：");
+                        while(true) {
+                            int order = Shop.sc.nextInt();
+                            if(order<0||order>loginUser.getFavoritesLength()){
+                                System.out.println("您输入的排序号有误请重新输入!");
+                            }else {
+                                loginUser.removeFavorites(order-1);
+                                System.out.println("移除成功");
+                                break;
+                            }
+                        }
+                        break;
+                    case 3:
+                        loginUser.clearFavorites();
+                        break;
+                    case 4:
+                        return;
+                    default:
+                        System.out.println("您的输入有误！");
+                        break;
+                }
+                System.out.println("****************************");
+            }
+        } else {
+            System.out.println("您还未登录，请先登录");
+        }
+    }
 
+    //购物车
     private void ShoppingCart() {
         if (User.isLogin) {
-            System.out.println("**********购物车功能***********");
-            System.out.println("\t1.查看购物车");
-            System.out.println("\t2.从购物车移除商品");
-            System.out.println("\t3.清空购物车");
-            System.out.println("\t4.结算");
-            System.out.println("\t5.返回上一级菜单");
-            System.out.print("请选择菜单：");
-            int cartChoice = sc.nextInt();
-
-            switch (cartChoice) {
-                case 1:
-                    System.out.println("*****查看购物车*****");
-                    loginUser.showShoppingCart();
-                    break;
-                case 2:
-                    loginUser.showShoppingCart();
-                    System.out.print("请输入要移除的商品排序号：");
-                    while(true) {
-                        int order = Shop.sc.nextInt();
-                        if(order<0||order>loginUser.getshoppingCartLength()){
-                            System.out.println("您输入的排序号有误请重新输入!");
-                        }else {
-                            loginUser.removeFromCart(order-1);
-                            System.out.println("移除成功");
-                            break;
+            while (true){
+                System.out.println("**********购物车功能***********");
+                System.out.println("\t1.查看购物车");
+                System.out.println("\t2.从购物车移除商品");
+                System.out.println("\t3.清空购物车");
+                System.out.println("\t4.结算");
+                System.out.println("\t5.返回上一级菜单");
+                System.out.print("请选择菜单：");
+                int cartChoice = sc.nextInt();
+                switch (cartChoice) {
+                    case 1:
+                        System.out.println("*****查看购物车*****");
+                        loginUser.showShoppingCart();
+                        break;
+                    case 2:
+                        loginUser.showShoppingCart();
+                        System.out.print("请输入要移除的商品排序号：");
+                        while(true) {
+                            int order = Shop.sc.nextInt();
+                            if(order<0||order>loginUser.getshoppingCartLength()){
+                                System.out.println("您输入的排序号有误请重新输入!");
+                            }else {
+                                loginUser.removeFromCart(order-1);
+                                System.out.println("移除成功");
+                                break;
+                            }
                         }
-                    }
-                    break;
-                case 3:
-                    loginUser.clearShoppingCart();
-                    break;
-                case 4:
-                    loginUser.checkout();
-                    break;
-                case 5:
-                    break;
-                default:
-                    System.out.println("您的输入有误！");
-                    break;
+                        break;
+                    case 3:
+                        loginUser.clearShoppingCart();
+                        break;
+                    case 4:
+                        loginUser.checkout();
+                        break;
+                    case 5:
+                        return;
+                    default:
+                        System.out.println("您的输入有误！");
+                        break;
+                }
+                System.out.println("****************************");
             }
-
-            System.out.println("****************************");
         } else {
-            System.out.println("您还未登录，请先登录，再查看购物车");
+            System.out.println("您还未登录，请先登录");
         }
     }
 
@@ -421,28 +471,28 @@ public class Shop {
     }
     //购买商品
     public void buy(){
-        System.out.println("请输入您要添加购物车的商品编号：");
+        System.out.println("请输入您要进行操作的商品编号：");
         Goods good = null;
         while(true) {
-            int id=Shop.sc.nextInt();
+            int id = sc.nextInt();
             //根据商品编号查找商品信息
             good = findGoodById(id);
             if(good == null) {
                 System.out.println("未找到该商品!");
-                System.out.println("请重新输入您要添加购物车的商品编号：");
+                System.out.println("请重新输入您要进行操作的商品编号：");
             }else {
-                System.out.println("您将要添加购物车的商品信息如下：");
+                System.out.println("您将要进行操作的商品信息如下：");
                 System.out.println(good);
                 break;
             }
         }
-        System.out.println("请输入您要添加购物车的商品数量：");
+        System.out.println("请输入您要进行操作的商品数量：");
         while(true) {
-            int num = Shop.sc.nextInt();
+            int num = sc.nextInt();
             //判断购买的商品数量是否大于库存数量
             if(num > good.getNum()) {
                 System.out.println("库存不足!");
-                System.out.println("请重新输入您要添加购物车的商品数量：");
+                System.out.println("请重新输入您要进行操作的商品数量：");
             }else {
                 Goods myGood = new Goods();
                 try {
@@ -451,15 +501,33 @@ public class Shop {
                 } catch (CloneNotSupportedException e) {
                     e.printStackTrace();
                 }
+                System.out.println("请输入您要进行的操作:");
+                System.out.println("1.直接购买");
+                System.out.println("2.添加进收藏夹");
+                System.out.println("3.添加进购物车");
+                int op = sc.nextInt();
 
-                //把已购商品添加到集合中
-//                Shop.myGoodList.add(myGood);
-                //添加到购物车中
-                addGoodsToCart(loginUser,myGood);
-                //更新商品的库存数量
-//                int newNum = good.getNum() - num;
-//                good.setNum(newNum);
-                break;
+                if(op==1){
+                        System.out.println("购买成功");
+                        //把已购商品添加到集合中
+                        Shop.myGoodList.add(myGood);
+                        //更新商品的库存数量
+                        int newNum = good.getNum() - num;
+                        good.setNum(newNum);
+                        break;
+                    }
+                if(op==2){
+                        System.out.println("添加收藏夹成功");
+                        loginUser.addFavorites(myGood);
+                        break;
+                    }
+                if(op==3){
+                        System.out.println("添加购物车成功");
+                        //添加到购物车中
+                        loginUser.addToCart(myGood);
+                        break;
+                    }
+                System.out.println("输入无效,请重新输入");
             }
         }
     }

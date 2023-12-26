@@ -24,20 +24,32 @@ public class User implements Serializable {
     public void setPassword(String password) {
         this.password = password;
     }
+
     public static boolean isLogin;
     // 用户类中增加购物车属性
     private List<Goods> shoppingCart; // 购物车
+    // 用户类中增加我的喜好
+    private List<Goods> favorites; // 收藏夹
 
     public User() {
         shoppingCart = new ArrayList<>();
+        favorites = new ArrayList<>();
     }
-
     // ... 其他方法
-
+    // 添加商品到收藏夹
+    public void addFavorites(Goods goods) {
+        favorites.add(goods);
+        System.out.println("已将商品添加到收藏夹！");
+    }
     // 添加商品到购物车
     public void addToCart(Goods goods) {
         shoppingCart.add(goods);
         System.out.println("已将商品添加到购物车！");
+    }
+    // 删除收藏夹中的商品
+    public void removeFavorites(int order) {
+        favorites.remove(order);
+        System.out.println("已从收藏夹中删除商品！");
     }
 
     // 删除购物车中的商品
@@ -45,13 +57,23 @@ public class User implements Serializable {
         shoppingCart.remove(order);
         System.out.println("已从购物车中删除商品！");
     }
+    //清空收藏夹
+    public void clearFavorites() {
+        favorites.clear();
+        System.out.println("收藏夹已清空！");
+    }
     //清空购物车
     public void clearShoppingCart() {
         shoppingCart.clear();
         System.out.println("购物车已清空！");
     }
+    //获取购物车内商品数量
     public int getshoppingCartLength() {
         return shoppingCart.size();
+    }
+    //获取收藏夹内商品数量
+    public int getFavoritesLength() {
+        return favorites.size();
     }
     // 显示购物车
     public void showShoppingCart() {
@@ -62,6 +84,18 @@ public class User implements Serializable {
             System.out.print("  商品名=" + shoppingCart.get(i).getName());
             System.out.print("  商品单价=" + shoppingCart.get(i).getPrice());
             System.out.println("  数量="+shoppingCart.get(i).getNum());
+        }
+        System.out.println("*****************");
+    }
+    // 显示收藏夹
+    public void showFavorites() {
+        System.out.println("*****收藏夹*****");
+        for (int i = 0; i < favorites.size(); i++) {
+            System.out.print("排序号="+(i+1));
+            System.out.print("  id="+favorites.get(i).getId());
+            System.out.print("  商品名=" + favorites.get(i).getName());
+            System.out.print("  商品单价=" + favorites.get(i).getPrice());
+            System.out.println("  数量="+favorites.get(i).getNum());
         }
         System.out.println("*****************");
     }
