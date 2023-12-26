@@ -14,7 +14,7 @@ public class Shop {
     static File userFile = new File("C:/user.txt");
     static File goodsFile = new File("C:/goods.txt");
     static File myGoodsFile = new File("C:/mygoods.txt");
-
+    //new
     //保存用户表
     public static void saveUserListToFile() {
         try {
